@@ -3,11 +3,12 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import os
 PORT = int(os.environ.get('PORT', 5000))
 import requests
+from bs4 import BeautifulSoup
 
 URL = "https://prpm.dbp.gov.my/cari1"
 page = requests.get(URL)
 
-print(page.text)
+soup = BeautifulSoup(page.content, "html.parser")
 
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -28,6 +29,10 @@ def help(update, context):
 
 def echo(update, context):
     """Echo the user message."""
+    results = soup.find(id="MainContent_panelresult")
+    meanings = results.find_all("div", class_="tab-pane")
+    for meaning in meanings:
+        print(meaning, end="\n"*2)
     update.message.reply_text(update.message.text)
 
 def error(update, context):
